@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Shoxruh Bekpulatov
@@ -17,6 +18,8 @@ public interface AudioRepo extends JpaRepository<Audio, Long> {
     @Query(value = "select a.* from public.audio a where a.audio_name ilike concat('%',:name,'%') ", nativeQuery = true)
     List<Audio> findByNameLikeIgnoreCase( @Param("name") String name );
 
+
+    Optional<Audio> findByAudioName( String audioName );
     @Modifying
     @Transactional
     @Query(value = "update public.audio  set audio_name = :name where id in (select aa.id from audio aa order by aa.id desc limit 1 )", nativeQuery = true)

@@ -14,6 +14,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Shoxruh Bekpulatov
@@ -47,11 +48,21 @@ public class BoomOvozBot extends TelegramLongPollingBot {
             Message message = update.getMessage();
             Long chatId = message.getChatId();
             if ( chatId.equals(1038332919L) && message.hasVoice() && Objects.nonNull(message.getCaption()) ) {
-                String name = message.getCaption().substring(0, message.getCaption().indexOf("\n"));
-                Voice voice = message.getVoice();
-                Audio save = audioRepo.save(new Audio(null, name, voice.getFileId(), voice.getFileUniqueId(), voice.getDuration(), voice.getMimeType(), voice.getFileSize()));
 
-                executeMSG(chatId.toString(), "Shep qowildi " + save.toString());
+                String name = " ";
+                try {
+                    name = message.getCaption().substring(0, message.getCaption().indexOf("\n"));
+                } catch ( Exception e ) {
+                    name = message.getCaption();
+                }
+                Voice voice = message.getVoice();
+                if ( audioRepo.findByAudioName(name).isEmpty() ) {
+                    Audio save = audioRepo.save(new Audio(null, name, voice.getFileId(), voice.getFileUniqueId(), voice.getDuration(), voice.getMimeType(), voice.getFileSize()));
+                    executeMSG(chatId.toString(), "Shep qowildi " + save.toString());
+
+                } else
+                    executeMSG(chatId.toString(), "Shep oldindan bor ekan bu " + name);
+
             } else if ( isAdmin(chatId) && message.hasVoice() ) {
                 Voice voice = message.getVoice();
                 Audio audio =
@@ -84,7 +95,8 @@ public class BoomOvozBot extends TelegramLongPollingBot {
                     .findByNameLikeIgnoreCase(query)
                     .stream()
                     .map(m -> new InlineQueryResultVoice(m.getFileUniqueId(), m.getFileId(), m.getAudioName()))
-                    .toList();
+                    .limit(20)
+                    .collect(Collectors.toList());
             this.answerInlineQuery(inlineQuery.getId(), shox);
         }
     }
