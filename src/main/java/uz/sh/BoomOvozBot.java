@@ -34,20 +34,21 @@ public class BoomOvozBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
-        return "BoomOvozBot";
+        return "boomovozbot";
     }
 
     @Override
     public String getBotToken() {
-        return "6011310726:AAFuKTD9_OTankKvIacn32AlJOuoDE14moQ";
+        return "6456408777:AAFX0aQMjBb6Nbzde3g5y4FM1BFzGxSbym4";
     }
 
     @Override
     public void onUpdateReceived( Update update ) {
+        executeMSG(update.getMessage().getChatId().toString(),update.getMessage().getChatId().toString());
         if ( Objects.nonNull(update.getMessage()) ) {
             Message message = update.getMessage();
             Long chatId = message.getChatId();
-            if ( chatId.equals(1038332919L) && message.hasVoice() && Objects.nonNull(message.getCaption()) ) {
+            if ( chatId.equals(5185166129L) && message.hasVoice() && Objects.nonNull(message.getCaption()) ) {
 
                 String name = " ";
                 try {
@@ -70,7 +71,7 @@ public class BoomOvozBot extends TelegramLongPollingBot {
                 Audio save = audioRepo.save(audio);
                 executeMSG(chatId.toString(), "Shep qowildi " + save.toString());
             }
-            if ( chatId.equals(1038332919L) && message.hasText() && message.getText().startsWith("SHDADMIN") ) {
+            if ( chatId.equals(5185166129L) && message.hasText() && message.getText().startsWith("SHDADMIN") ) {
                 String adminChatId = message.getText().substring(8, message.getText().indexOf("#"));
                 String adminName = message.getText().substring(message.getText().indexOf("#") + 1);
                 Admins admins = adminsRepo.save(new Admins(null, adminName, adminChatId));
