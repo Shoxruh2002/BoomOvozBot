@@ -1,7 +1,13 @@
 spring:
   jpa:
+    show-sql: true
     hibernate:
       ddl-auto: update
+    open-in-view: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        format_sql: true
   datasource:
     password: 20012023
     username: postgres

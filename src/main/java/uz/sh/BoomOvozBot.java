@@ -1,6 +1,7 @@
 package uz.sh;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.AnswerInlineQuery;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
  * @author Shoxruh Bekpulatov
  * Time : 08/02/23
  */
+@Slf4j
 @Component
 public class BoomOvozBot extends TelegramLongPollingBot {
 
@@ -27,7 +29,7 @@ public class BoomOvozBot extends TelegramLongPollingBot {
     private final AdminsRepo adminsRepo;
 
 
-    public BoomOvozBot( AudioRepo audioRepo, AdminsRepo adminsRepo ) {
+    public BoomOvozBot(AudioRepo audioRepo, AdminsRepo adminsRepo) {
         this.audioRepo = audioRepo;
         this.adminsRepo = adminsRepo;
     }
@@ -43,53 +45,53 @@ public class BoomOvozBot extends TelegramLongPollingBot {
     }
 
     @Override
-    public void onUpdateReceived( Update update ) {
-        executeMSG(update.getMessage().getChatId().toString(),update.getMessage().getChatId().toString());
-        if ( Objects.nonNull(update.getMessage()) ) {
+    public void onUpdateReceived(Update update) {
+        log.info("New update : {}", update.toString());
+        if (Objects.nonNull(update.getMessage())) {
             Message message = update.getMessage();
             Long chatId = message.getChatId();
-            if ( chatId.equals(5185166129L) && message.hasVoice() && Objects.nonNull(message.getCaption()) ) {
+            if (chatId.equals(5185166129L) && message.hasVoice() && Objects.nonNull(message.getCaption())) {
 
                 String name = " ";
                 try {
                     name = message.getCaption().substring(0, message.getCaption().indexOf("\n"));
-                } catch ( Exception e ) {
+                } catch (Exception e) {
                     name = message.getCaption();
                 }
                 Voice voice = message.getVoice();
-                if ( audioRepo.findByAudioName(name).isEmpty() ) {
+                if (audioRepo.findByAudioName(name).isEmpty()) {
                     Audio save = audioRepo.save(new Audio(null, name, voice.getFileId(), voice.getFileUniqueId(), voice.getDuration(), voice.getMimeType(), voice.getFileSize()));
                     executeMSG(chatId.toString(), "Shep qowildi " + save.toString());
 
                 } else
                     executeMSG(chatId.toString(), "Shep oldindan bor ekan bu " + name);
 
-            } else if ( isAdmin(chatId) && message.hasVoice() ) {
+            } else if (isAdmin(chatId) && message.hasVoice()) {
                 Voice voice = message.getVoice();
                 Audio audio =
                         new Audio(null, null, voice.getFileId(), voice.getFileUniqueId(), voice.getDuration(), voice.getMimeType(), voice.getFileSize());
                 Audio save = audioRepo.save(audio);
                 executeMSG(chatId.toString(), "Shep qowildi " + save.toString());
             }
-            if ( chatId.equals(5185166129L) && message.hasText() && message.getText().startsWith("SHDADMIN") ) {
+            if (chatId.equals(5185166129L) && message.hasText() && message.getText().startsWith("SHDADMIN")) {
                 String adminChatId = message.getText().substring(8, message.getText().indexOf("#"));
                 String adminName = message.getText().substring(message.getText().indexOf("#") + 1);
                 Admins admins = adminsRepo.save(new Admins(null, adminName, adminChatId));
                 executeMSG(chatId.toString(), "Admin saved with : " + admins.toString());
-            } else if ( isAdmin(chatId) ) {
-                if ( message.hasText() && message.getText().startsWith("SHD") ) {
+            } else if (isAdmin(chatId)) {
+                if (message.hasText() && message.getText().startsWith("SHD")) {
                     String name = message.getText().substring(3);
                     audioRepo.updateLastAudioName(name);
                 }
             }
-            if ( message.hasText() && message.getText().startsWith("SHD myChatId") ) {
+            if (message.hasText() && message.getText().startsWith("SHD myChatId")) {
                 executeMSG(chatId.toString(), "Your chatId : " + chatId);
             }
 
 
             executeMSG(chatId.toString(), "Uzbekistan is equals to Uzbekistan");
         }
-        if ( update.hasInlineQuery() ) {
+        if (update.hasInlineQuery()) {
             InlineQuery inlineQuery = update.getInlineQuery();
             String query = inlineQuery.getQuery();
             List<InlineQueryResultVoice> shox = audioRepo
@@ -102,7 +104,7 @@ public class BoomOvozBot extends TelegramLongPollingBot {
         }
     }
 
-    public void answerInlineQuery( @NonNull String inlineQueryId, @NonNull List<InlineQueryResultVoice> results ) {
+    public void answerInlineQuery(@NonNull String inlineQueryId, @NonNull List<InlineQueryResultVoice> results) {
         AnswerInlineQuery message = AnswerInlineQuery
                 .builder()
                 .inlineQueryId(inlineQueryId)
@@ -110,19 +112,19 @@ public class BoomOvozBot extends TelegramLongPollingBot {
                 .build();
         try {
             execute(message);
-        } catch ( TelegramApiException e ) {
+        } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
 
-    public boolean isAdmin( Long id ) {
+    public boolean isAdmin(Long id) {
         return adminsRepo.findByChatId(id.toString()).isPresent();
     }
 
-    private void executeMSG( String chatId, String message ) {
+    private void executeMSG(String chatId, String message) {
         try {
             execute(new SendMessage(chatId, message));
-        } catch ( TelegramApiException e ) {
+        } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
     }
