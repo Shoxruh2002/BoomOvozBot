@@ -41,7 +41,7 @@ public class BoomOvozBot extends TelegramLongPollingBot {
 
     @Override
     public String getBotToken() {
-        return "6456408777:AAFX0aQMjBb6Nbzde3g5y4FM1BFzGxSbym4";
+        return "6456408777:AAF0pI2UghpjNLfFcU5wxmZ1eew-KpPyQds";
     }
 
     @Override
@@ -91,7 +91,7 @@ public class BoomOvozBot extends TelegramLongPollingBot {
 
             executeMSG(chatId.toString(), "Uzbekistan is equals to Uzbekistan");
         }
-        if (update.hasInlineQuery()) {
+        if (Objects.nonNull(update.getInlineQuery())) {
             InlineQuery inlineQuery = update.getInlineQuery();
             String query = inlineQuery.getQuery();
             List<InlineQueryResultVoice> shox = audioRepo
